@@ -27,7 +27,9 @@ const io = new Server(server, {
 app.use(express.json());
 app.use(cors());
 app.use(morgan("dev"));
-
+app.get('/home', (req,res)=>{
+  res.send("hello user");
+});
 app.use('/api/v1/user/', userRouter)
 
 // Integrate Socket.io handler
