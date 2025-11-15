@@ -18,6 +18,7 @@ const emailVerify = async (token, email) => {
   }
 };
 
+// okk agai
 const resetPassEmail = async (otp, email) => {
   try {
     await resend.emails.send({
