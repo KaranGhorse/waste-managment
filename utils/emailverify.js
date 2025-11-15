@@ -1,12 +1,12 @@
 require('dotenv').config();
 const { Resend } = require('resend');
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend('re_Fzhg6uVo_DxikPcLAnHrQckRVRHAKh3tv');
 
 const emailVerify = async (token, email) => {
   try {
     await resend.emails.send({
-      from: process.env.RESEND_FROM,
+      from: 'karanghorse91@gmail.com',
       to: email,
       subject: "Email Verification",
       text: `Verify your email: http://localhost:5173/verify/${token}`,
@@ -22,7 +22,7 @@ const emailVerify = async (token, email) => {
 const resetPassEmail = async (otp, email) => {
   try {
     await resend.emails.send({
-      from: process.env.RESEND_FROM,
+      from: 'karanghorse91@gmail.com',
       to: email,
       subject: "Reset Password OTP",
       text: `Your OTP is: ${otp}`,
