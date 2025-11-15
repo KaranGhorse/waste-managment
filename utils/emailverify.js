@@ -1,88 +1,36 @@
-// Filename - tokenSender.js
+require('dotenv').config();
+const { Resend } = require('resend');
 
-const nodemailer = require('nodemailer');
-require('dotenv').config()
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS
-    }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
- const emailVerify = (token, email)=>{
-    const mailConfigurations = {
-    
-        // It should be a string of sender/server email
-        from: process.env.MAIL_USER,
-    
-        to: email,
-    
-        // Subject of Email
-        subject: 'Email Verification',
-        
-        // This would be the text of email body
-        text: `Hi! There, You have recently visited 
-               our website and entered your email.
-               Please follow the given link to verify your email
-               http://localhost:5173/verify/${token} 
-               Thanks`
-    };
-    
-    transporter.sendMail(mailConfigurations, function(error, info){
-        if (error) return console.error("Email send failed:", error);
-        console.log('Email Sent Successfully');
-        // console.log(info);
-    }); 
+const emailVerify = async (token, email) => {
+  try {
+    await resend.emails.send({
+      from: process.env.RESEND_FROM,
+      to: email,
+      subject: "Email Verification",
+      text: `Verify your email: http://localhost:5173/verify/${token}`,
+    });
 
-}
- const resetPassEmail = (otp, email)=>{
-    const mailConfigurations = {
-    
-        // It should be a string of sender/server email
-        from: process.env.MAIL_USER,
-    
-        to: email,
-    
-        // Subject of Email
-        subject: 'Reset Password email',
-        
-        // This would be the text of email body
-        text: `Hi! There, You have Forgot password 
-              
-               OTP is ${otp}
-               Thanks`
-    };
-    
-    transporter.sendMail(mailConfigurations, function(error, info){
-        if (error) return console.error("Email send failed:", error.message);
-        console.log('Email Sent Successfully');
-        // console.log(info);
-    }); 
+    console.log("Verification email sent!");
+  } catch (error) {
+    console.error("Email send failed:", error.message);
+  }
+};
 
-}
+const resetPassEmail = async (otp, email) => {
+  try {
+    await resend.emails.send({
+      from: process.env.RESEND_FROM,
+      to: email,
+      subject: "Reset Password OTP",
+      text: `Your OTP is: ${otp}`,
+    });
 
-// const resetPassEmail = (token,email)=>{
-//     const mailConfigurations = {
-    
-//         // It should be a string of sender/server email
-//         from: process.env.MAIL_USER,
-    
-//         to: email,
-    
-//         // Subject of Email
-//         subject: 'Passwor Reset OTP',
-        
-//         // This would be the text of email body
-//         html: `<p>Your OTP for password reset is <b>${otp}</b></p>`
-//     };
-    
-//     transporter.sendMail(mailConfigurations, function(error, info){
-//         if (error) throw Error(error);
-//         console.log('OTP Sent Successfully');
-//         console.log(info);
-//     }); 
-// }
+    console.log("OTP email sent!");
+  } catch (error) {
+    console.error("Email send failed:", error.message);
+  }
+};
 
-
-module.exports = {emailVerify,resetPassEmail}
+module.exports = { emailVerify, resetPassEmail };
