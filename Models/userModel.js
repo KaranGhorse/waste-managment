@@ -29,10 +29,13 @@ const userSchema = new mongoose.Schema(
     referredBy: { type: String },
 
     coins: {
-      total: { type: Number, default: 0 },
-      earned: { type: Number, default: 0 },
-      redemed: { type: Number, default: 0 },
-    },
+    balance: { type: Number, default: 0 },           // available coins user ke paas
+    earnedTotal: { type: Number, default: 0 },       // lifetime earned (record keeping)
+    spentTotal: { type: Number, default: 0 },        // total used/withdrawn
+    pendingWithdrawal: { type: Number, default: 0 }, // withdrawal request me jo hold hai
+    locked: { type: Number, default: 0 },            // temporarily blocked (fraud/review)
+    updatedAt: { type: Date, default: Date.now }     // last coins update time
+  },
     isVerified:{
         type:Boolean,
         default: false

@@ -15,6 +15,8 @@ const isAuthenticated =  async (req, res, next) => {
         console.log("something is here");
         
         const token = authHeader.split(" ")[1]
+        console.log(token);
+        
         let decoded;
         
         try {
@@ -35,7 +37,7 @@ const isAuthenticated =  async (req, res, next) => {
         }
 
         const user = await userModel.findById(decoded.id);
-        
+        console.log(user);
         if (!user) return res.status(400).json({ success: false, message: "user not found" });
         
         console.log("something is going from here");
