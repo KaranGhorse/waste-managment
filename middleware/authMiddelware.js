@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
-const userModel = require('../Models/userModel')
+const userModel = require('../Models/userModel');
+const adminModel = require('../Models/adminModel');
 
 
 const isAuthenticated =  async (req, res, next) => {
@@ -52,13 +53,50 @@ const isAuthenticated =  async (req, res, next) => {
 }
 
 
-const isAdmin =  (req,res,next)=>{
-    try {
-        if(req.user || req.user.role == 'admin')
-            next()
-        else return res.status(403).json({success:false, message:"Access denied Admin only!"})
+const isAdmin = async (req,res,next)=>{
+      try {
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return res.status(400).json({
+                success: false,
+                message: "Authorization token is missing or invailid"
+            })
+        }
+        console.log("something is here");
+        
+        const token = authHeader.split(" ")[1]
+        console.log(token);
+        
+        let decoded;
+        
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET)
+            
+        } catch (error) {
+            
+            if (error.name === "TokenExpiredError") {
+                return res.status(400).json({
+                    success: false,
+                    message: "The Session has expired"
+                })
+            }
+            return res.status(400).json({
+                success: false,
+                message: "The Authentication faield"
+            })
+        }
+
+        const admin = await adminModel.findById(decoded.id);
+        console.log(admin);
+        if (!admin) return res.status(400).json({ success: false, message: "admin not found" });
+        
+        console.log("something is going from here");
+        req.admin = admin
+        next()
+
     } catch (error) {
-        return res.status(500).json({success:false, message:error.message})
+        return res.status(500).json({ success: false, message: error.message })
     }
 }
 

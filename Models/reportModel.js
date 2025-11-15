@@ -14,7 +14,18 @@ const reportSchema = new mongoose.Schema(
       address: String,
     },
 
-    photos: [String], // up to 3 URLs
+    photos: [
+        {
+            url: {
+                type: String,
+                required: true
+            },
+            public_id:{
+                type:String,
+                required: true
+            }
+        }
+    ] ,// cloudinary public id for deletation
     type: {
       reportedType: {type:String, enum: ["dry waste", "Bio waste", "Solid waste"]}, // what user selected
       verifiedType: {type:String, enum: ["dry waste", "Bio waste", "Solid waste"]}, // what driver verified

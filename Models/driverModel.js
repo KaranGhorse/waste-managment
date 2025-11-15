@@ -23,16 +23,23 @@ const driverSchema = new mongoose.Schema(
     phoneNo: { type: String },
 
     coins: {
-      total: { type: Number, default: 0 },
-      earned: { type: Number, default: 0 },
-      spent: { type: Number, default: 0 },
-    },
+    balance: { type: Number, default: 0 },           // available coins user ke paas
+    earnedTotal: { type: Number, default: 0 },       // lifetime earned (record keeping)
+    spentTotal: { type: Number, default: 0 },        // total used/withdrawn
+    pendingWithdrawal: { type: Number, default: 0 }, // withdrawal request me jo hold hai
+    locked: { type: Number, default: 0 },            // temporarily blocked (fraud/review)
+    updatedAt: { type: Date, default: Date.now }     // last coins update time
+  },
 
     withdrawHistory: [withdrawHistorySchema],
     bankDetails: bankDetailsSchema,
 
     active: { type: Boolean, default: false },
-    
+    isLoggedIn: { type: Boolean, default: false },
+    otp: { type: String, default: null },
+    otpExpiry: { type: Date, default: null },
+    eligibleForNewPass:{type:Boolean,default:false},
+    token:{type:String},
     location: {
       lat: { type: Number, default: 0 },
       lng: { type: Number, default: 0 },
