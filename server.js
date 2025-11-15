@@ -5,9 +5,10 @@ const morgan = require("morgan");
 const http = require("http");
 const { Server } = require("socket.io");
 const connectDB = require("./DB/conn.js");
-const { vehicleSocketHandler } = require("./socket/vehicleSocket");
+const { socketHandler } = require("./socket/vehicleSocket");
 
 const userRouter = require('./routes/userRoute.js')
+const reportRouter = require('./routes/reportRoute.js')
 
 dotenv.config();
 connectDB();
@@ -29,9 +30,10 @@ app.use(cors());
 app.use(morgan("dev"));
 
 app.use('/api/v1/user/', userRouter)
+app.use('/api/v1/report/', reportRouter)
 
 // Integrate Socket.io handler
-vehicleSocketHandler(io);
+socketHandler(io);
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () =>
