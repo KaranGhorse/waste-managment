@@ -39,9 +39,9 @@ router.post('/signup', [
     const hashPassword = await bcrypt.hash(password, 10)
     let newUser;
     if (!referredBy)
-      newUser = new userModel({ name, email, password: hashPassword, referralCode, otpExpiry });
+      newUser = new userModel({ name, email, password: hashPassword, referralCode, otpExpiry,otp });
     else
-      newUser = new userModel({ name, email, password: hashPassword, referralCode, referredBy, otpExpiry });
+      newUser = new userModel({ name, email, password: hashPassword, referralCode, referredBy, otpExpiry,otp });
 
     OtpEmail(otp, email, "Signup Verification OTP") // send email to user
     await newUser.save();
