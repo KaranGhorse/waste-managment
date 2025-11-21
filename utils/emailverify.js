@@ -19,13 +19,13 @@ const emailVerify = async (token, email) => {
 };
 
 // okk agai
-const resetPassEmail = async (otp, email) => {
+const OtpEmail = async (otp, email,sub) => {
   try {
     await resend.emails.send({
       from: 'karanghorse91@gmail.com',
       to: email,
-      subject: "Reset Password OTP",
-      text: `Your OTP is: ${otp}`,
+      subject: sub,
+      text: `Your OTP is: ${otp}. Expired in 10 minits`,
     });
 
     console.log("OTP email sent!");
@@ -34,4 +34,4 @@ const resetPassEmail = async (otp, email) => {
   }
 };
 
-module.exports = { emailVerify, resetPassEmail };
+module.exports = { emailVerify, OtpEmail };

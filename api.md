@@ -10,7 +10,8 @@
     {
         "name": "string",
         "email": "string",
-        "password": "string" (min 6 len)
+        "password": "string" (min 6 len),
+        "referredBy": "string" (min 8 length)
     }
     ```
 - **Response:**
@@ -24,14 +25,21 @@
     ```
 
 #### 2. Verify User By Email Link
-- **Endpoint:** `GET /api/v1/user/verify/:token`
-- **Request Parameters:**
-    - `token`: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTM4MjdlZDMzYWY5MWViZGE3ODg5NyIsImlhdCI6
+- **Endpoint:** `Post /api/v1/user/verify/otp`
+- **Request Body:**
+    ```json
+    {
+        "otp": "string",
+        "email":"string"
+    }
+    ```
 - **Response:**
     ```json
     { 
     "success": true, 
-    "message": "Email verified successfully!"
+    "message": "Email verified successfully!",
+    "user":{},
+    "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTM4MjdlZDMzYWY5MWViZGE3ODg5NyIsImlhdCI6MTc2Mjk2MTk4M30.q_VZWkba2BfvM2XJRhpJfq26Y6f7nZ8E8hMVTMlC7Ko"
      }
     ```
 
@@ -151,6 +159,7 @@
     ```json
     {
         "success": true,"message":"welCome",
+        "reports":{},
         "user": {
         "coins": {
             "total": 0,
