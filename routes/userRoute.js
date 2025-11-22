@@ -128,7 +128,10 @@ router.post("/login", [
       if (!user)
         return res.status(404).json({ success: false, message: "User not found" });
 
-      const isMatch = await bcrypt.compare(password, user.password);
+      if (!user.isVerified)
+        return res.status(404).json({ success: false, message: "User not Verified" });
+
+      const isMatch = bcrypt.compare(password, user.password);
       if (!isMatch)
         return res.status(401).json({ success: false, message: "Invalid credentials" });
 
