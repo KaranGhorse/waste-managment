@@ -39,6 +39,10 @@ const driverSchema = new mongoose.Schema(
     otp: { type: String, default: null },
     otpExpiry: { type: Date, default: null },
     eligibleForNewPass:{type:Boolean,default:false},
+     isVerified:{
+        type:Boolean,
+        default: false
+    },
     token:{type:String},
     location: {
       lat: { type: Number, default: 0 },
@@ -50,7 +54,13 @@ const driverSchema = new mongoose.Schema(
       totalRatings: { type: Number, default: 0 },
       totalWork: { type: Number, default: 0 },
     },
-
+ reports: [
+      {
+        reportId: { type: mongoose.Schema.Types.ObjectId, ref: "Report" },
+      
+      },
+    ],
+    
     reportStats: {
       totalReports: { type: Number, default: 0 },
       accepted: { type: Number, default: 0 },

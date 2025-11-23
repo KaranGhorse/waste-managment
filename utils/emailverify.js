@@ -3,13 +3,13 @@ const { Resend } = require('resend');
 
 const resend = new Resend('re_Fzhg6uVo_DxikPcLAnHrQckRVRHAKh3tv');
 
-const emailVerify = async (token, email) => {
+const sendEmail = async (email,sub="Bharat safai abhiyan",content="Bharat safai abhiyan") => {
   try {
     await resend.emails.send({
       from: 'karanghorse91@gmail.com',
       to: email,
-      subject: "Email Verification",
-      text: `Verify your email: http://localhost:5173/verify/${token}`,
+      subject: sub,
+      text: content,
     });
 
     console.log("Verification email sent!");
@@ -34,4 +34,4 @@ const OtpEmail = async (otp, email,sub) => {
   }
 };
 
-module.exports = { emailVerify, OtpEmail };
+module.exports = { sendEmail, OtpEmail };

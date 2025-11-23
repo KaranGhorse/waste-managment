@@ -5,29 +5,34 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 
 
-const { emailVerify ,resetPassEmail} = require("../utils/emailverify");
+const { sendEmail, OtpEmail} = require("../utils/emailverify");
 const { isAuthenticated } = require("../middleware/authMiddelware");
-const driverModel = require('../Models/driverModel')
+const driverModel = require('../Models/driverModel');
+const reportModel = require("../Models/reportModel");
+const { randomOtp } = require("../utils/service");
 // ---------------------- ROUTES ----------------------
 
-//✅✅ Verify Email 
-router.get("/verify/:token", async(req,res)=>{
-    try {
-    const { token } = req.params;
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//✅✅ Verify Email //! in confution for it exist or not 
+// router.get("/verify/", async(req,res)=>{
+//     try {
+//       const {email } = req.params; 
+//     const { otp } = req.body;
+//     // const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const driver = await driverModel.findById(decoded.id);
-    if (!driver) return res.status(404).json({ success: false, message: "driver not found" });
+//     const driver = await driverModel.findOne({email});
+//     if (!driver) return res.status(404).json({ success: false, message: "driver not found" });
 
-    driver.isVerified = true;
-    await driver.save();
+//     if()
 
-    res.status(200).json({ success: true, message: "Email verified successfully!" });
-  } catch (error) {
-    console.error("Verify Error:", error);
-    res.status(400).json({ success: false, message: "Invalid or expired token" });
-  }
-});
+//     driver.isVerified = true;
+//     await driver.save();
+
+//     res.status(200).json({ success: true, message: "Email verified successfully!" });
+//   } catch (error) {
+//     console.error("Verify Error:", error);
+//     res.status(400).json({ success: false, message: "Invalid or expired token" });
+//   }
+// });
 
 //✅✅ Login
 router.post("/login",[
@@ -47,9 +52,23 @@ router.post("/login",[
     if (!driver)
       return res.status(404).json({ success: false, message: "driver not found" });
 
-    // const isMatch = await bcrypt.compare(password, driver.password);
-    // if (!isMatch)
-    //   return res.status(401).json({ success: false, message: "Invalid credentials" });
+    // if (!driver.isVerified){
+    //   driver.otp = randomOtp();
+    //   driver.otpExpiry = new Date(Date.now() + 10 * 60 * 1000) // 10min
+
+    // OtpEmail(driver.otp,driver.email,"Driver verification email");
+
+    // await driver.save()
+    // res.status(200).json({
+    //   success: true,
+    //   message: "OTP sent to email",
+    // });
+    // }
+  
+
+    const isMatch = await bcrypt.compare(password, driver.password);
+    if (!isMatch)
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
 
     const token = jwt.sign({ id: driver._id }, process.env.JWT_SECRET);
 
@@ -82,7 +101,7 @@ router.post("/forgot-password",
     driver.otp = Math.floor(100000 + Math.random() * 900000).toString();
     driver.otpExpiry = new Date(Date.now() + 10 * 60 * 1000) // 10min
 
-    resetPassEmail(driver.otp,driver.email);
+    OtpEmail(driver.otp,driver.email,"Password Reset Email");
 
     await driver.save()
     res.status(200).json({
@@ -108,9 +127,14 @@ router.post('/verify-otp/:email', async(req,res)=>{
         if (driver.otpExpiry < new Date()) return res.status(400).json({ sucess: false, message: "OTP Expired request for new OTP !" })
 
         if (driver.otp !== req.body.otp) return res.status(400).json({ sucess: false, message: "Invailid OTP !" })
+
+        if(driver.isVerified){
+          driver.eligibleForNewPass=true;
+        }else{
+          driver.isVerified = true
+        }
         driver.otp = null
         driver.otpExpiry = null
-        driver.eligibleForNewPass=true;
         await driver.save();
         return res.status(201).json({ message: "OTP Verification successfully", success: true });
 
@@ -186,11 +210,13 @@ router.put("/update-profile",isAuthenticated ,async(req,res)=>{
 router.get('/',isAuthenticated, async(req,res)=>{
     try {
         const driver = await driverModel.findById(req.id)
-
+        
         if(!driver) 
           return res.status(404).json({success: false, message: "driver not found!"})
 
-        res.status(200).json({success: true,message:"welCome", driver})
+        const reports = await reportModel.find({acceptedBy:req.id})
+
+        res.status(200).json({success: true,message:"welCome", driver,reports})
 
 
     } catch (error) {

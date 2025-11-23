@@ -49,14 +49,10 @@ const userSchema = new mongoose.Schema(
     withdrawHistory: [withdrawHistorySchema],
     bankDetails: bankDetailsSchema,
 
-    reportHistory: [
+    reports: [
       {
         reportId: { type: mongoose.Schema.Types.ObjectId, ref: "Report" },
-        status: {
-          type: String,
-          enum: ["pending", "accepted", "rejected"],
-          default: "pending",
-        },
+      
       },
     ],
 

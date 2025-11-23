@@ -99,6 +99,7 @@ router.post("/make-report",multipleUpload,
       user.coins.balance += userCoins;
       user.coins.earnedTotal += userCoins;
       user.coins.updatedAt = new Date();
+      user.reports.push(newReport._id)
       await user.save();
 
       const io = getIO();

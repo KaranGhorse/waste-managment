@@ -5,11 +5,13 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 
 
-const { emailVerify, resetPassEmail } = require("../utils/emailverify");
+const { emailVerify, resetPassEmail, sendEmail } = require("../utils/emailverify");
 const { isAuthenticated, isAdmin } = require("../middleware/authMiddelware");
 // const adminModel = require('../Models/adminModel')
 const adminModel = require('../Models/adminModel')
-const driverModel = require('../Models/driverModel')
+const driverModel = require('../Models/driverModel');
+const { randomOtp } = require("../utils/service");
+const reportModel = require("../Models/reportModel");
 // ---------------------- ROUTES ----------------------
 
 router.post('/signup', [
@@ -102,38 +104,180 @@ router.post('/make-driver', isAdmin, async (req, res) => {
 
 
     console.log("hererererrerererer AAAAAdmin");
-
+    const pass = randomOtp()
     const newDriver = await driverModel.create({
       name,
       email,
-      password:email
+      password:pass
     });
     console.log(newDriver);
-    
-    //! send email to driver his account is created and credientials 
-    res.status(200).json({ success: true, message: "Driver acc created", driver: newDriver })
+const content = `  hi ${newDriver.name}, \n Your Driver account just created and your password are: \n ${newDriver.password}`
+    sendEmail(newDriver.email,"driver Credientials",content )
+
+    res.status(200).json({ success: true, message: "driver creation successful! Verification email sent to driver.", driver: newDriver })
   } catch (error) {
     res.status(500).json({ status: false, message: "Internal errror" })
   }
 })
 
+router.get('/drivers',isAdmin, async(req,res)=>{
+  try {
+    const drivers = await driverModel.find().populate('reports')
+
+    return res.status(200).json({success: true, message: "all drivers are here", drivers})
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({success:false, message: error.message})
+  }
+})
+router.get('/users',isAdmin, async(req,res)=>{
+  try {
+    const users = await userModel.find().populate('reports')
+
+    return res.status(200).json({success: true, message: "all users are here", users})
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({success:false, message: error.message})
+  }
+})
+router.get('/reports',isAdmin, async(req,res)=>{
+  try {
+    const reports = await reportModel.find().populate([
+  {
+    path: "reportedBy",
+    select: "name email"
+  },
+  {
+    path: "acceptedBy",
+    select: "name phone"
+  }
+])
+
+    return res.status(200).json({success: true, message: "all reports are here", reports})
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({success:false, message: error.message})
+  }
+})
+
+router.get('/user-details/:id',isAdmin, async(req,res)=>{
+  try {
+    const { id } = req.params;
+
+    const user = await userModel.findById(id)
+      .populate({
+        path: "reports.reportId",
+        populate: [
+          { path: "reportedBy" },   // Report schema ke andar
+          { path: "acceptedBy" }    // driver reference
+        ]
+      })
+      .populate("feedbacks");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({success: true, message: "user is here", user})
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({success:false, message: error.message})
+  }
+})
+
+router.get('/driver-details/:id',isAdmin, async(req,res)=>{
+  try {
+    const { id } = req.params;
+
+    const driver = await driverModel.findById(id)
+      .populate({
+        path: "reports.reportId",
+        populate: [
+          { path: "reportedBy" },
+          { path: "acceptedBy" }
+        ]
+      })
+      .populate("feedbacks");
+
+    if (!driver) {
+      return res.status(404).json({ message: "Driver not found" });
+    }
+
+    return res.status(200).json({success: true, message: "driver is here", driver})
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({success:false, message: error.message})
+  }
+})
 
 
+router.get('/report-details/:id',isAdmin, async(req,res)=>{
+  try {
+    const { id } = req.params;
 
+    const report = await Report.findById(id)
+      .populate({
+        path: "reportedBy",
+        select: "name email phoneNo"
+      })
+      .populate({
+        path: "acceptedBy",
+        select: "name email phoneNo"
+      });
 
+    if (!report) {
+      return res.status(404).json({ message: "Report not found" });
+    }
 
+    return res.status(200).json({success: true, message: "report is here", report})
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({success:false, message: error.message})
+  }
+})
 
+router.get('/dashbord', isAdmin, async(req,res)=>{
+  try {
+    
+    // --- REPORT STATS ---
+    const totalReports = await reportModel.countDocuments();
 
+    const reportsByStatus = await reportModel.aggregate([
+      { $group: { _id: "$status", count: { $sum: 1 } } }
+    ]);
 
+    // --- USER STATS ---
+    const totalUsers = await userModel.countDocuments();
 
+    // --- DRIVER STATS ---
+    const totalDrivers = await driverModel.countDocuments();
+    const activeDrivers = await driverModel.countDocuments({ active: true });
 
+    return res.status(200).json({
+      success: true,
+      data: {
+        reports: {
+          total: totalReports,
+          byStatus: reportsByStatus,   // e.g. [{ _id: "pending", count: 10 }]
+        },
+        users: {
+          total: totalUsers,
+        },
+        drivers: {
+          total: totalDrivers,
+          active: activeDrivers,
+        },
+      },
+    });
 
-
-
-
-
-
-
+  } catch (error) {
+    console.error("Dashboard fetching error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+})
 
 
 
