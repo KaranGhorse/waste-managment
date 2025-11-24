@@ -42,10 +42,12 @@ router.post('/signup', [
       newUser = new userModel({ name, email, password: hashPassword, referralCode, otpExpiry,otp });
     else
       newUser = new userModel({ name, email, password: hashPassword, referralCode, referredBy, otpExpiry,otp });
-
+    console.log(otp);
+    
     OtpEmail(otp, email, "Signup Verification OTP") // send email to user
+
     await newUser.save();
-    res.status(201).json({ message: "Signup successful! Verification email sent.", success: true });
+    res.status(201).json({ message: "Signup successful! Verification email sent.", success: true, otp });
   } catch (error) {
     console.error("Error in /register:", error);
     res.status(500).json({ message: "Internal Server Error", success: false })
