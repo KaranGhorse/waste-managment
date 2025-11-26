@@ -80,7 +80,7 @@ router.post("/make-report",multipleUpload,
       const driverCoins = randomCoinGen();
 
       // ✅ Create report
-      const newReport = new reportModel({
+      let newReport = new reportModel({
         reportedBy: userId,
         userCoinsEarned: userCoins,
         driverCoinsEarned: driverCoins,
@@ -118,11 +118,15 @@ router.post("/make-report",multipleUpload,
         console.log(`📢 Sent new-report to driver ${driver.socketId}`);
       });
 
+      const report = await reportModel.findById(newReport._id)
+  .populate("reportedBy", "name email phone") // fields limit
+  .populate("acceptedBy", "name email phoneNo rating coins active");
+
       // ✅ Send success response
       res.status(201).json({
         success: true,
         message: "Report created successfully!",
-        report: newReport,
+        report,
         user
       });
     } catch (error) {

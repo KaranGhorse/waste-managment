@@ -58,10 +58,12 @@ router.post('/signup', [
 router.post("/verify/otp", async (req, res) => {
   try {
     const { email, otp } = req.body;
-
+    console.log(req.body);
+    
     const user = await userModel.findOne({ email });
     if (!user) 
       return res.status(404).json({ success: false, message: "User not found" });
+    console.log(user);
 
     if (!user.otp || !user.otpExpiry) 
       return res.status(400).json({ sucess: false, message: "OTP not genrated or Expired !" })
@@ -78,7 +80,8 @@ router.post("/verify/otp", async (req, res) => {
     user.otpExpiry = null
     user.token = token
     await user.save();
-
+  console.log(user);
+  
     res.status(200).json({ success: true, message: "Email verified successfully!",user,token });
   } catch (error) {
     console.error("Verify Error:", error);
