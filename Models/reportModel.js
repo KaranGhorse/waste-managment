@@ -27,8 +27,8 @@ const reportSchema = new mongoose.Schema(
         }
     ] ,// cloudinary public id for deletation
     type: {
-      reportedType: {type:String, enum: ["dry waste", "Bio waste", "Solid waste"]}, // what user selected
-      verifiedType: {type:String, enum: ["dry waste", "Bio waste", "Solid waste"]}, // what driver verified
+      reportedType: {type:String, enum: ["dry waste", "bio waste", "solid waste", "all"]}, // what user selected
+      verifiedType: {type:String, enum: ["dry waste", "bio waste", "solid waste", "all"]}, // what driver verified
     },
     weight: {  // optional
       reportedWeight: String, // what user selected
