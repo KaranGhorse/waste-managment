@@ -10,6 +10,7 @@ const { isAuthenticated } = require("../middleware/authMiddelware");
 const userModel = require('../Models/userModel');
 const reportModel = require('../Models/reportModel');
 const { uniqueReferralCode, randomOtp } = require("../utils/service");
+const driverModel = require("../Models/driverModel");
 // ---------------------- ROUTES ----------------------
 //✅✅
 router.post('/signup', [
@@ -129,7 +130,10 @@ router.post("/login", [
         return res.status(400).json({ success: false, errors: errors.array() });
 
       const { email, password } = req.body;
-      const user = await userModel.findOne({ email });
+      let user = await userModel.findOne({ email });
+      if (!user){
+        user = await driverModel.findOne({email})
+      }
       if (!user)
         return res.status(404).json({ success: false, message: "User not found" });
 

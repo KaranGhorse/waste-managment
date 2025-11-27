@@ -12,6 +12,7 @@ const reportModel = require("../Models/reportModel");
 
 const { randomCoinGen, findNearbyRecentReportWithInHours, getNearbyDrivers } = require("../utils/reportsUtils");
 const { isAuthenticated } = require("../middleware/authMiddelware");
+const driverModel = require("../Models/driverModel");
 
 
 router.post("/make-report",multipleUpload,
@@ -101,6 +102,11 @@ router.post("/make-report",multipleUpload,
       user.coins.updatedAt = new Date();
       user.reports.push(newReport._id)
       await user.save();
+      
+      newReport.populate({
+        path: "reportedBy",
+        select: "name email phoneNo"
+      })
 
       const io = getIO();
       const drivers = getConnectedDrivers();
@@ -138,5 +144,48 @@ router.post("/make-report",multipleUpload,
   }
 );
 
+router.get('/accept-report/:reportId',isAuthenticated ,async(req,res)=>{
+try {
+  const driver = await driverModel.findById(req.user._id)
 
+  if(!driver)
+    return res.status(400).json({success: false, message:"Driver not found"})
+  
+  console.log(req.params.reportId);
+  const report = await reportModel.findById(req.params.reportId)
+  
+  report.acceptedBy = driver._id;
+  report.status = "pending";
+  await report.save()
+  
+  driver.reports.push({ reportId: report._id })
+  driver.pending = driver.pending + 1;
+  driver.accepted = driver.accepted + 1;
+  
+  await driver.save()
+
+// send socket notification to user
+  const connectedUsers = getConnectedUsers();
+
+  connectedUsers.forEach((user) => {
+    if (user.userId.toString() === report.reportedBy.toString()) {
+      const io = getIO();
+      io.to(user.socketId).emit("report-accepted", {
+        report,
+        driver,
+        msg: "Your report has been accepted by a driver."
+      });
+
+      console.log(`📢 Sent report-accepted to user ${user.socketId}`);
+    }
+  }); 
+  
+  res.status(200).json({success: true, message: "report added", report, driver})
+  
+} catch (error) {
+  console.log(error);
+  
+  return res.status(500).json({success: false, message: error.message})
+}
+})
 module.exports = router

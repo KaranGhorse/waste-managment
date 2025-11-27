@@ -62,7 +62,7 @@ const driverSchema = new mongoose.Schema(
     ],
     
     reportStats: {
-      totalReports: { type: Number, default: 0 },
+      completed: { type: Number, default: 0 },
       accepted: { type: Number, default: 0 },
       declined: { type: Number, default: 0 },
       pending: { type: Number, default: 0 },
