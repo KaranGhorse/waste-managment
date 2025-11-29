@@ -212,6 +212,7 @@
       "address": "string",
       "weight": "string",
       "notes": "string",
+      "files": []
   }
   ```
 - **Response:**
