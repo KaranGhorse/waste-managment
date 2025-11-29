@@ -26,35 +26,45 @@ router.post("/make-report",multipleUpload,
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
+        console.log("Error in express validation in body");
+        
         return res
-          .status(400)
-          .json({ success: false, errors: errors.array() });
+        .status(400)
+        .json({ success: false, errors: errors.array() });
       }
-
+      
+      console.log("Request body:", req.body);
       const { latitude, longitude, address, type, weight, notes } = req.body;
       const userId = req.id;
-
+      console.log("userid:", req.id);
+      
       // ✅ Validate image count (min 1, max 3)
       if (!req.files || req.files.length < 1 || req.files.length > 3) {
+        console.log("Invalid number of images uploaded");
         return res.status(400).json({
           success: false,
           message: "Please upload minimum 1 or maximum 3 images.",
         });
       }
-
+      
       // ✅ Check if user exists
       const user = await userModel.findById(userId);
-      if (!user)
+      if (!user){
+        console.log("User not found");
         return res.status(404).json({ success: false, message: "User not found." });
-
+      }
+      
+      console.log("User found =", user);
       const data = await findNearbyRecentReportWithInHours(latitude, longitude);
-
+      console.log("Data found", data);
+      
       if (data.length != 0) {
         return res.status(400).json({
           success: false,
           message: "All Ready Report Posted From This Area",
         });
       }
+      // console.log("User found =", user);
       console.log("chek for files");
       // ✅ Upload all images to Cloudinary
       const uploadedImages = await Promise.all(
