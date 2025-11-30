@@ -36,7 +36,7 @@ const reportSchema = new mongoose.Schema(
     },
  
 
-    status: { type: String, enum: ["new","pending", "accepted", "rejected"], default: "new" },
+    status: { type: String, enum: ["new","pending", "accepted", "rejected","done"], default: "new" },
 
     timestamps: {
       createdAt: { type: Date, default: Date.now },

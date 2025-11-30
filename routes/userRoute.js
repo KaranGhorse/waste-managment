@@ -256,7 +256,10 @@ router.get('/', isAuthenticated, async (req, res) => {
     if (!user)
       return res.status(404).json({ success: false, message: "user not found!" })
 
-    const reports = await reportModel.find({reportedBy: user._id})
+const reports = await reportModel.find({
+  reportedBy: user._id,
+  reportStatus: { $ne: "done" }
+}).sort({ createdAt: -1 }).populate("acceptedBy", "name phoneNo");
 
     res.status(200).json({ success: true, message: "welCome", user ,reports})
 
