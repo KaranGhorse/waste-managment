@@ -24,7 +24,7 @@ const adminSchema = new mongoose.Schema(
     profilePic: { type: String },
     profilePicPublicId: { type: String, default: "" }, // cloudinary public id for deletation
     googleId: { type: String },
-
+role:String,
     isVerified:{
         type:Boolean,
         default: false

@@ -45,7 +45,7 @@ const userSchema = new mongoose.Schema(
     otpExpiry: { type: Date, default: null },
     eligibleForNewPass:{type:Boolean,default:false},
     token:{type:String},
-
+   role: String,
     withdrawHistory: [withdrawHistorySchema],
     bankDetails: bankDetailsSchema,
 

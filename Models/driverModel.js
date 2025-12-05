@@ -21,7 +21,8 @@ const driverSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     phoneNo: { type: String },
-
+referralCode: { type: String },
+    referredBy: { type: String },
     coins: {
     balance: { type: Number, default: 0 },           // available coins user ke paas
     earnedTotal: { type: Number, default: 0 },       // lifetime earned (record keeping)
@@ -33,7 +34,7 @@ const driverSchema = new mongoose.Schema(
 
     withdrawHistory: [withdrawHistorySchema],
     bankDetails: bankDetailsSchema,
-
+    role:String,
     active: { type: Boolean, default: false },
     isLoggedIn: { type: Boolean, default: false },
     otp: { type: String, default: null },
