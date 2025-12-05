@@ -181,6 +181,7 @@ router.post("/forgot-password",
       res.status(200).json({
         success: true,
         message: "OTP sent to email",
+        otp:user.otp
       });
     } catch (error) {
       console.error("Forgot Password Error:", error);

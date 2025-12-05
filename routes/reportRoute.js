@@ -87,29 +87,29 @@ router.post("/make-report",multipleUpload,
 
       // ✅ Random coins between 5–35
 
-      const userCoins = randomCoinGen();
-      const driverCoins = randomCoinGen();
+      // const userCoins = randomCoinGen();
+      // const driverCoins = randomCoinGen();
 
       // ✅ Create report
       let newReport = new reportModel({
         reportedBy: userId,
-        userCoinsEarned: userCoins,
-        driverCoinsEarned: driverCoins,
+        // userCoinsEarned: userCoins,
+        // driverCoinsEarned: driverCoins,
         location: { lat: latitude, lng: longitude, address },
         photos: uploadedImages,
         type: { reportedType: type },
         weight: { reportedWeight: weight },
         notes,
-        status: "pending",
+        status: "new",
       });
 
       await newReport.save();
       console.log("new report here creted");
       
       // ✅ Update user's coin balance
-      user.coins.balance += userCoins;
-      user.coins.earnedTotal += userCoins;
-      user.coins.updatedAt = new Date();
+      // user.coins.balance += userCoins;
+      // user.coins.earnedTotal += userCoins;
+      // user.coins.updatedAt = new Date();
       user.reports.push(newReport._id)
       await user.save();
       
