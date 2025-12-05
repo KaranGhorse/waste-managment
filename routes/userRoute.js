@@ -93,7 +93,7 @@ router.post("/verify/otp", async (req, res) => {
 //✅✅
 router.get('/resend-otp/:email', async (req, res) => {
   try {
-    const email = req.params.email;
+    const { email } = req.body;
     const user = await userModel.findOne({ email });
     if (!user)
       return res.status(404).json({ success: false, message: "User not found" });
@@ -109,6 +109,7 @@ router.get('/resend-otp/:email', async (req, res) => {
     await user.save()
     res.status(200).json({
       success: true,
+      otp:user.otp,
       message: "OTP sent to email",
     });
 
