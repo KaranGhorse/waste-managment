@@ -91,7 +91,7 @@ router.post("/verify/otp", async (req, res) => {
 });
 
 //✅✅
-router.get('/resend-otp/:email', async (req, res) => {
+router.get('/resend-otp', async (req, res) => {
   try {
     const { email } = req.body;
     const user = await userModel.findOne({ email });
