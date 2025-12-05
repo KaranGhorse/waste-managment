@@ -11,6 +11,7 @@ const userModel = require('../Models/userModel');
 const reportModel = require('../Models/reportModel');
 const { uniqueReferralCode, randomOtp } = require("../utils/service");
 const driverModel = require("../Models/driverModel");
+const adminModel = require("../Models/adminModel");
 // ---------------------- ROUTES ----------------------
 //✅✅
 router.post('/signup', [
@@ -27,22 +28,26 @@ router.post('/signup', [
     if (!errors.isEmpty())
       return res.status(400).json({ success: false, errors: errors.array() });
 
-    const { name, email, password, referredBy } = req.body;
+    const { name, role ,email, password, referredBy } = req.body;
 
-    const exitingUser = await userModel.findOne({ email });
+    let exitingUser = await userModel.findOne({ email });
     if (exitingUser) {
-      return res.status(400).json({ success: false, message: "User already exists" });
+      exitingUser = await driverModel.findOne({ email });
     }
+    if(exitingUser)
+      return res.status(400).json({ success: false, message: "User already exists" });
 
     const referralCode = uniqueReferralCode();
     const otp = randomOtp();
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000)
     const hashPassword = await bcrypt.hash(password, 10)
     let newUser;
-    if (!referredBy)
-      newUser = new userModel({ name, email, password: hashPassword, referralCode, otpExpiry,otp });
-    else
-      newUser = new userModel({ name, email, password: hashPassword, referralCode, referredBy, otpExpiry,otp });
+    if (!referredBy && role === 'USER')
+      newUser = new userModel({ name, email,role: "USER", password: hashPassword, referralCode, otpExpiry,otp });
+    else if(role === 'USER')
+      newUser = new userModel({ name, email,role: "USER", password: hashPassword, referralCode, referredBy, otpExpiry,otp });
+    else if(role === 'ADMIN')
+      newUser = new driverModel({ name, email,role:"ADMIN", password: hashPassword, referralCode,otpExpiry,otp });
     console.log(otp);
     
     OtpEmail(otp, email, "Signup Verification OTP") // send email to user
@@ -91,20 +96,22 @@ router.post("/verify/otp", async (req, res) => {
 });
 
 //✅✅
-router.get('/resend-otp', async (req, res) => {
+router.post('/resend-otp', async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await userModel.findOne({ email });
+    let user = await userModel.findOne({ email });
+    if (!user)
+      user = await driverModel.findOne({ email });
     if (!user)
       return res.status(404).json({ success: false, message: "User not found" });
 
-    if (!user.otp)
-      return res.status(404).json({ success: false, message: "First try to Forgot Password!" });
+    // if (!user.otp)
+    //   return res.status(404).json({ success: false, message: "First try to Forgot Password!" });
 
     user.otp = randomOtp();
     user.otpExpiry = new Date(Date.now() + 10 * 60 * 1000) // 10min
 
-    OtpEmail(user.otp, user.email, "Otp");
+    // OtpEmail(user.otp, user.email, "Otp");
 
     await user.save()
     res.status(200).json({
@@ -169,14 +176,16 @@ router.post("/forgot-password",
         return res.status(400).json({ success: false, errors: errors.array() });
 
       const { email } = req.body;
-      const user = await userModel.findOne({ email });
+      let user = await userModel.findOne({ email });
+      if (!user)
+        user = await driverModel.findOne({ email });
       if (!user)
         return res.status(404).json({ success: false, message: "User not found" });
 
       user.otp = randomOtp()
       user.otpExpiry = new Date(Date.now() + 10 * 60 * 1000) // 10min
 
-      OtpEmail(user.otp, user.email, "Reset Password OTP");
+      // OtpEmail(user.otp, user.email, "Reset Password OTP");
 
       await user.save()
       res.status(200).json({
@@ -215,12 +224,14 @@ router.post('/verify-otp/:email', async (req, res) => {
 })
 
 //✅✅
-router.post('/new-password/:email', async (req, res) => {
+router.post('/new-password', async (req, res) => {
   try {
-    const { newPassword } = req.body
+    const { newPassword,email } = req.body
 
-    const user = await userModel.findOne({ email: req.params.email })
+    let user = await userModel.findOne({ email })
 
+    if (!user)
+      user = await driverModel.findOne({ email })
     if (!user)
       return res.status(400).json({ sucess: false, message: "User not found" })
 
