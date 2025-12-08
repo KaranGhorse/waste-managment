@@ -1,3 +1,5 @@
+const driverModel = require("../Models/driverModel");
+
 let io;
 // Maps
 const connectedDrivers = new Map(); // key = driverId
@@ -12,7 +14,10 @@ const socketHandler = (socketIo) => {
 
     
     //todo DRIVER CONNECT
-    socket.on("driver_connect", (data) => {
+    socket.on("driver_connect", async (data) => {
+      let driver = await driverModel.findById(data.driverId)
+      driver.active = true;
+      await driver.save();
       // data = { driverId, lat, lng ,id}
       connectedDrivers.set(data.driverId, {
         socketId: socket.id,
@@ -63,12 +68,14 @@ const socketHandler = (socketIo) => {
 
     
     // todod DISCONNECT 
-    socket.on("disconnect", () => {
+    socket.on("disconnect",async () => {
       console.log("❌ Client disconnected:", socket.id);
 
       // Remove from drivers map
       for (const [driverId, driverData] of connectedDrivers) {
         if (driverData.socketId === socket.id) {
+          let driver = await driverModel.findById(driverId)
+          driver.active = false;
           connectedDrivers.delete(driverId);
           console.log("🚗 Driver removed:", driverId);
         }

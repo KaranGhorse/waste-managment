@@ -34,7 +34,10 @@ referralCode: { type: String },
 
     withdrawHistory: [withdrawHistorySchema],
     bankDetails: bankDetailsSchema,
-    role:String,
+       role: {
+    type: String,
+    default: "DRIVER"
+   },
     active: { type: Boolean, default: false },
     isLoggedIn: { type: Boolean, default: false },
     otp: { type: String, default: null },

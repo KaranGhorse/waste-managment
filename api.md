@@ -116,10 +116,7 @@
     ```
 
 #### 6. Resend OTP
-- **Endpoint:** `post /api/v1/user/resend-otp/:email`
-
-- **Request Parameters:**
-    - `email`: "string
+- **Endpoint:** `post /api/v1/user/resend-otp`
 
 - **Response:**
     ```json
@@ -130,14 +127,12 @@
     ```
 
 #### 7. New password   frontend should be (otp==confirmOtp)
-- **Endpoint:** `post /api/v1/user/new-password/:email`
-
-- **Request Parameters:**
-    - `email`: "string
+- **Endpoint:** `post /api/v1/user/new-password`
 
 - **Request Body:**
     ```json
     {
+        "email": "Email"
         "newPassword": "string"
     }
     ```

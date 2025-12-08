@@ -32,11 +32,15 @@ router.post('/signup', [
       return res.status(400).json({ success: false, message: "User already exists" });
     }
     // const hashPassword = await bcrypt.hash(password, 10)
-    const newUser = new adminModel({ name, email, password });
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-    emailVerify(token, email) // send email to user
 
-    newUser.token = token
+    const otp = randomOtp();
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000)
+
+    const newUser = new adminModel({ name, email, password, otp, otpExpiry });
+    // const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+    // emailVerify(token, email) // send email to user
+
+    // newUser.token = token
     await newUser.save();
     res.status(201).json({ message: "Signup successful! Verification email sent.", success: true });
   } catch (error) {
@@ -120,7 +124,7 @@ const content = `  hi ${newDriver.name}, \n Your Driver account just created and
   }
 })
 
-router.get('/drivers',isAdmin, async(req,res)=>{
+router.get('/drivers', async(req,res)=>{
   try {
     const drivers = await driverModel.find().populate('reports')
 

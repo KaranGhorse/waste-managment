@@ -46,8 +46,8 @@ router.post('/signup', [
       newUser = new userModel({ name, email,role: "USER", password: hashPassword, referralCode, otpExpiry,otp });
     else if(role === 'USER')
       newUser = new userModel({ name, email,role: "USER", password: hashPassword, referralCode, referredBy, otpExpiry,otp });
-    else if(role === 'ADMIN')
-      newUser = new driverModel({ name, email,role:"ADMIN", password: hashPassword, referralCode,otpExpiry,otp });
+    else if(role === 'DRIVER')
+      newUser = new driverModel({ name, email,role:"DRIVER", password: hashPassword, referralCode,otpExpiry,otp });
     console.log(otp);
     
     OtpEmail(otp, email, "Signup Verification OTP") // send email to user
@@ -66,7 +66,9 @@ router.post("/verify/otp", async (req, res) => {
     const { email, otp } = req.body;
     console.log(req.body);
     
-    const user = await userModel.findOne({ email });
+    let user = await userModel.findOne({ email });
+    if (!user) 
+      user = await driverModel.findOne({ email });
     if (!user) 
       return res.status(404).json({ success: false, message: "User not found" });
     console.log(user);
@@ -110,7 +112,6 @@ router.post('/resend-otp', async (req, res) => {
 
     user.otp = randomOtp();
     user.otpExpiry = new Date(Date.now() + 10 * 60 * 1000) // 10min
-
     // OtpEmail(user.otp, user.email, "Otp");
 
     await user.save()
@@ -153,7 +154,10 @@ router.post("/login", [
         return res.status(401).json({ success: false, message: "Invalid credentials" });
 
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-
+      user.token = token
+      // if(user.role === 'DRIVER')
+        // user.active=true;
+      await user.save()
       res.status(200).json({
         success: true,
         message: "Login successful",
