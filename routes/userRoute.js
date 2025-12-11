@@ -276,7 +276,7 @@ router.get('/', isAuthenticated, async (req, res) => {
 const reports = await reportModel.find({
   reportedBy: user._id,
   reportStatus: { $ne: "done" }
-}).sort({ createdAt: -1 }).populate("acceptedBy", "name phoneNo");
+}).sort({ createdAt: -1 })
 
     res.status(200).json({ success: true, message: "welCome", user ,reports})
 
