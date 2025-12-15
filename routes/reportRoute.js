@@ -131,12 +131,16 @@ router.post("/make-report",multipleUpload,
           msg: "A new report is available near you."
         });
 
-        console.log(`📢 Sent new-report to driver ${driver.socketId}`);
+        console.log(`📢 Sent new-report to driver ${driver.socketId} ,  - _id ${driver.driverId}`);
       });
 
-      const report = await reportModel.findById(newReport._id)
-  .populate("reportedBy", "name email phone") // fields limit
-  .populate("acceptedBy", "name email phoneNo rating coins active");
+  //     const report = await reportModel.findById(newReport._id)
+  // .populate("reportedBy", "name email phone") // fields limit
+  // .populate("acceptedBy", "name email phoneNo rating coins active");
+  const report = await reportModel.findById(newReport._id)
+  .populate("reportedBy")
+  .populate("acceptedBy");
+
 
       // ✅ Send success response
       res.status(201).json({
